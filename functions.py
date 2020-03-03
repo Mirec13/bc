@@ -1,4 +1,6 @@
 import csv
+import math
+import itertools as c
 
 
 def load_file(file_name):
@@ -30,32 +32,80 @@ def init_first_population():
     pass
 
 
-def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_value, state):
+def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_value, state, number_of_epi):
     comb_number = 0
+    match = 0
+
+    for i in c.product('012', repeat=number_of_epi):
+        print(i)
 
     # compute the observed value for every combination's state
-    for i in range(3):
-        for j in range(3):
-            for k in range(sample_size):
-                if (data[k][loci[0]] == i) and (data[k][loci[1]] == j):
-                    if state[k] == 0:
-                        observed_value[comb_number][0] += 1
-                    else:
-                        observed_value[comb_number][1] += 1
+    for i in range(sample_size):
+        for j in c.product('012', repeat=number_of_epi):
+            for k in range(number_of_epi):
+                if data[i][loci[k]] == int(j[k]):
+                    match += 1
+            if match == number_of_epi:
+                if state[i] == 0:
+                    observed_value[comb_number][0] += 1
+                else:
+                    observed_value[comb_number][1] += 1
+            match = 0
             comb_number += 1
+        comb_number = 0
+
+    comb_number = pow(3, number_of_epi)
 
     # compute the expected value
     for i in range(comb_number):
         expected_value[i] = ((observed_value[i][0] + observed_value[i][1]) / 2)
 
 
-def k2_score():
-    pass
+def k2_score(observed_value, comb):
+    final_score = 0.0
+    sub_score = [0.0] * 2
+
+    for i in range(comb):
+        num_o_value = observed_value[i][0] + observed_value[i][1]
+        for j in range(num_o_value+1):
+            final_score += math.log(j+1)
+        for j in range(2):
+            for k in range(observed_value[i][j]):
+                sub_score[j] += math.log(k+1)
+        final_score -= (sub_score[0] + sub_score[1])
+        sub_score[0] = 0.0
+        sub_score[1] = 0.0
+
+    return final_score
 
 
-def gi_score():
-    pass
+def gi_score(observed_value, comb, sample_size):
+    final_score = 0.0
+    sub_score = [0.0] * 2
+
+    for i in range(comb):
+        num_o_value = observed_value[i][0] + observed_value[i][1]
+        for j in range(2):
+            sub_score[j] = (observed_value[i][j] / num_o_value)
+            sub_score[j] = pow(sub_score[j], 2)
+        final_score += (num_o_value / sample_size) * (1 - (sub_score[0] + sub_score[1]))
+        sub_score[0] = 0.0
+        sub_score[1] = 0.0
+
+    return final_score
 
 
-def g_test():
-    pass
+def g_test(observed_value, expected_value, comb):
+    final_score = 0.0
+    sub_score = [0.0] * 2
+
+    for i in range(comb):
+        for j in range(2):
+            prob = observed_value[i][j] / expected_value[i]
+            if prob != 0:
+                sub_score[j] = (observed_value[i][j]) * (math.log(prob))
+        final_score += (sub_score[0] + sub_score[1])
+        sub_score[0] = 0.0
+        sub_score[1] = 0.0
+
+    return 2 * final_score
