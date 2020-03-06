@@ -109,3 +109,39 @@ def g_test(observed_value, expected_value, comb):
         sub_score[1] = 0.0
 
     return 2 * final_score
+
+
+def comb_without_repetition(number, number_rep):
+    numerator = number - (number - number_rep)
+    denominator = number_rep
+    result_numerator = 1
+    result_denominator = 1
+
+    for i in range(numerator):
+        result_numerator *= number
+        number -= 1
+
+    for i in range(denominator):
+        result_denominator *= number_rep
+        number_rep -= 1
+
+    final_result = result_numerator / result_denominator
+
+    return final_result
+
+
+def prob_switch(initial_prob, number_of_iteration, actual_iteration):
+    prob = initial_prob - (0.1 * ((number_of_iteration - actual_iteration) / number_of_iteration))
+    return prob
+
+
+
+
+
+
+
+
+
+
+
+

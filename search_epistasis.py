@@ -39,9 +39,10 @@ def search(file_name, prob_switch, number_of_iter, number_of_population, number_
         print(f.gi_score(flower[0].observed_value, comb, snp_data.sample_size))
         g = f.g_test(flower[0].observed_value, flower[0].expected_value, comb)
         print(g)
-        print(chi2.sf(g, 7))
+        print(chi2.sf(g, 9))
         print(flower[0].observed_value, flower[0].expected_value)
-
+        print(0.1/f.comb_without_repetition(100, number_of_epi))
+        print(f.prob_switch(0.6, 50, 50))
         break
 
 
