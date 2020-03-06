@@ -4,7 +4,6 @@
     <list default="true" id="fae1a065-8fa9-49ef-9111-03aa0b2c7d05" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/search_epistasis.py" beforeDir="false" afterPath="$PROJECT_DIR$/search_epistasis.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +126,7 @@
       <workItem from="1583252729560" duration="16828000" />
       <workItem from="1583342339095" duration="1654000" />
       <workItem from="1583440154004" duration="706000" />
-      <workItem from="1583480106482" duration="2000000" />
+      <workItem from="1583480106482" duration="2793000" />
     </task>
     <servers />
   </component>

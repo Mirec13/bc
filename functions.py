@@ -28,7 +28,7 @@ def load_file(file_name):
         return data
 
 
-def init_first_population():
+def init_first_population(number_of_dimension):
     pass
 
 
@@ -135,9 +135,12 @@ def prob_switch(initial_prob, number_of_iteration, actual_iteration):
     return prob
 
 
+def local_search():
+    pass
 
 
-
+def global_search():
+    pass
 
 
 
