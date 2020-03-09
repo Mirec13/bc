@@ -43,6 +43,7 @@ def init_first_population(number_of_dimension, number_of_loci, population):
         for vector in subset:
             if set(vector) == set(epistasis):
                 match = True
+                break
         if match:
             continue
         else:
@@ -135,6 +136,15 @@ def g_test(observed_value, expected_value, comb):
     return 2 * final_score
 
 
+def subtract_df(observed_values, min_value, comb):
+    df = comb
+    for o in observed_values:
+        if (o[0] < min_value) and (o[1] < min_value):
+            df -= 1
+
+    return df
+
+
 def comb_without_repetition(number, number_rep):
     numerator = number - (number - number_rep)
     denominator = number_rep
@@ -155,7 +165,7 @@ def comb_without_repetition(number, number_rep):
 
 
 def prob_switch(initial_prob, number_of_iteration, actual_iteration):
-    prob = initial_prob - (0.1 * ((number_of_iteration - actual_iteration) / number_of_iteration))
+    prob = initial_prob + (0.1 * ((number_of_iteration - actual_iteration) / number_of_iteration))
     return prob
 
 

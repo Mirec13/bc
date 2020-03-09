@@ -3,10 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="fae1a065-8fa9-49ef-9111-03aa0b2c7d05" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/testFile.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/search_epistasis.py" beforeDir="false" afterPath="$PROJECT_DIR$/search_epistasis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +129,7 @@
       <workItem from="1583440154004" duration="706000" />
       <workItem from="1583480106482" duration="4885000" />
       <workItem from="1583694088589" duration="7056000" />
-      <workItem from="1583775175745" duration="4483000" />
+      <workItem from="1583775175745" duration="10245000" />
     </task>
     <servers />
   </component>
@@ -147,22 +145,22 @@
       <screen x="0" y="0" width="1920" height="1035" />
     </state>
     <state x="694" y="265" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1035@0.0.1920.1035" timestamp="1583091267389" />
-    <state width="1874" height="344" key="GridCell.Tab.0.bottom" timestamp="1583779891295">
+    <state width="1874" height="344" key="GridCell.Tab.0.bottom" timestamp="1583786126825">
       <screen x="0" y="0" width="1920" height="1035" />
     </state>
-    <state width="1874" height="344" key="GridCell.Tab.0.bottom/0.0.1920.1035@0.0.1920.1035" timestamp="1583779891295" />
-    <state width="1874" height="344" key="GridCell.Tab.0.center" timestamp="1583779891294">
+    <state width="1874" height="344" key="GridCell.Tab.0.bottom/0.0.1920.1035@0.0.1920.1035" timestamp="1583786126825" />
+    <state width="1874" height="344" key="GridCell.Tab.0.center" timestamp="1583786126825">
       <screen x="0" y="0" width="1920" height="1035" />
     </state>
-    <state width="1874" height="344" key="GridCell.Tab.0.center/0.0.1920.1035@0.0.1920.1035" timestamp="1583779891294" />
-    <state width="1874" height="344" key="GridCell.Tab.0.left" timestamp="1583779891294">
+    <state width="1874" height="344" key="GridCell.Tab.0.center/0.0.1920.1035@0.0.1920.1035" timestamp="1583786126825" />
+    <state width="1874" height="344" key="GridCell.Tab.0.left" timestamp="1583786126824">
       <screen x="0" y="0" width="1920" height="1035" />
     </state>
-    <state width="1874" height="344" key="GridCell.Tab.0.left/0.0.1920.1035@0.0.1920.1035" timestamp="1583779891294" />
-    <state width="1874" height="344" key="GridCell.Tab.0.right" timestamp="1583779891295">
+    <state width="1874" height="344" key="GridCell.Tab.0.left/0.0.1920.1035@0.0.1920.1035" timestamp="1583786126824" />
+    <state width="1874" height="344" key="GridCell.Tab.0.right" timestamp="1583786126825">
       <screen x="0" y="0" width="1920" height="1035" />
     </state>
-    <state width="1874" height="344" key="GridCell.Tab.0.right/0.0.1920.1035@0.0.1920.1035" timestamp="1583779891295" />
+    <state width="1874" height="344" key="GridCell.Tab.0.right/0.0.1920.1035@0.0.1920.1035" timestamp="1583786126825" />
     <state width="1874" height="336" key="GridCell.Tab.1.bottom" timestamp="1583738535080">
       <screen x="0" y="0" width="1920" height="1035" />
     </state>
@@ -197,7 +195,7 @@
     <state x="719" y="389" width="708" height="304" key="org.intellij.images.editor.actions.BackgroundImageDialog/0.0.1920.1035@0.0.1920.1035" timestamp="1583095374928" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/bc$search_epistasis.coverage" NAME="search_epistasis Coverage Results" MODIFIED="1583779891284" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/bc$search_epistasis.coverage" NAME="search_epistasis Coverage Results" MODIFIED="1583786126816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/bc$functions.coverage" NAME="functions Coverage Results" MODIFIED="1583262968312" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/bc$test.coverage" NAME="test Coverage Results" MODIFIED="1583775673538" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
