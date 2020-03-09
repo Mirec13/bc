@@ -8,7 +8,7 @@
 #num=levy.rvs(0, 100)
 #print(levy.cdf(num, 0, 100));
 #print(num);
-
+from random import uniform
 from mpmath import gamma
 from math import sin
 print(float(gamma(0.00245)))
@@ -23,3 +23,4 @@ from collections import namedtuple
 MyStruct = namedtuple("MyStruct", "field1 field2 field3")
 m = MyStruct(field1="foo", field2="bar", field3="baz")
 print(m.field1)
+print(uniform(0,1))

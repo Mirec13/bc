@@ -1,5 +1,7 @@
 import csv
 import math
+import numpy as np
+import random
 import itertools as c
 
 
@@ -28,8 +30,26 @@ def load_file(file_name):
         return data
 
 
-def init_first_population(number_of_dimension):
-    pass
+def init_first_population(number_of_dimension, number_of_loci, population):
+    random.seed(int(random.uniform(0, 100)))
+    list_of_loci = [i for i in range(number_of_loci)]
+    random.shuffle(list_of_loci)
+    subset = []
+    i = 0
+
+    while i < population:
+        epistasis = random.sample(list_of_loci, number_of_dimension)
+        match = False
+        for vector in subset:
+            if set(vector) == set(epistasis):
+                match = True
+        if match:
+            continue
+        else:
+            subset.append(epistasis)
+            i += 1
+
+    return subset
 
 
 def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_value, state, number_of_epi):
@@ -86,8 +106,9 @@ def gi_score(observed_value, comb, sample_size):
     for i in range(comb):
         num_o_value = observed_value[i][0] + observed_value[i][1]
         for j in range(2):
-            sub_score[j] = (observed_value[i][j] / num_o_value)
-            sub_score[j] = pow(sub_score[j], 2)
+            if num_o_value > 0:
+                sub_score[j] = (observed_value[i][j] / num_o_value)
+                sub_score[j] = pow(sub_score[j], 2)
         final_score += (num_o_value / sample_size) * (1 - (sub_score[0] + sub_score[1]))
         sub_score[0] = 0.0
         sub_score[1] = 0.0
@@ -101,7 +122,10 @@ def g_test(observed_value, expected_value, comb):
 
     for i in range(comb):
         for j in range(2):
-            prob = observed_value[i][j] / expected_value[i]
+            if expected_value[i] > 0.0:
+                prob = observed_value[i][j] / expected_value[i]
+            else:
+                prob = 0
             if prob != 0:
                 sub_score[j] = (observed_value[i][j]) * (math.log(prob))
         final_score += (sub_score[0] + sub_score[1])
