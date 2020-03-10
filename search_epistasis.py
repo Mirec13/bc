@@ -49,11 +49,13 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
                 flowers[i].objective_function_score[0] = f.k2_score(flowers[i].observed_value, comb)
                 flowers[i].objective_function_score[1] = f.gi_score(flowers[i].observed_value, comb,
                                                                     snp_data.sample_size)
+            # get the first non-dominated solution
             f.pareto_optimization(flowers, number_of_population, non_dominated)
+
             for i in flowers:
                 print(i.objective_function_score)
-
             print("\n", non_dominated)
+
             # the number of generation we want to create
             for i in range(number_of_iter):
                 glob = 0
