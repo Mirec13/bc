@@ -57,9 +57,6 @@ def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_val
     comb_number = 0
     match = 0
 
-    for i in c.product('012', repeat=number_of_epi):
-        print(i)
-
     # compute the observed value for every combination's state
     for i in range(sample_size):
         for j in c.product('012', repeat=number_of_epi):
@@ -115,6 +112,27 @@ def gi_score(observed_value, comb, sample_size):
         sub_score[1] = 0.0
 
     return final_score
+
+
+def pareto_optimization(flowers, population, non_dominated):
+    for i in range(population):
+        dominated = False
+        for j in range(population):
+            if (((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
+                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1])) or
+                ((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
+                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1])) or
+                ((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
+                 (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1]))):
+                dominated = True
+                break
+            elif (((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
+                   (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1])) and
+                  (i != j)):
+                dominated = True
+                break
+        if not dominated:
+            non_dominated.append(flowers[i].objective_function_score)
 
 
 def g_test(observed_value, expected_value, comb):
