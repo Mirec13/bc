@@ -191,9 +191,22 @@ def local_search():
     pass
 
 
-def global_search():
-    pass
+def levy_flight(index_beta):
+    exponent = 1 / index_beta
+    numerator = math.gamma(1 + index_beta) * math.sin((math.pi * index_beta) / 2)
+    denominator = math.gamma((1 + index_beta) / 2) * index_beta * math.pow(2, (index_beta - 1) / 2)
+    base = math.pow(numerator / denominator, exponent)
 
+    u = np.random.sample(0, base)
+    v = np.random.sample(0, 1)
+
+    random_step = u / math.pow(v, 1 / index_beta)
+
+    return random_step
+
+
+def global_search(index_beta, prev_best_flower, prev_flower):
+    pass
 
 
 

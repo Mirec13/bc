@@ -41,6 +41,7 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
             # initialize the first population
             vector = f.init_first_population(number_of_epi, snp_data.snp_size, number_of_population)
             print(vector)
+
             for i in range(number_of_population):
                 for j in range(number_of_epi):
                     flowers[i].loci[j] = vector[i][j]
@@ -75,7 +76,7 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
 
 def start():
     starting_time = time.perf_counter()
-    search("testFileNME.txt", 0.5, 50, 10, 0.1, 2, 1, 10)
+    search("testFileME.txt", 0.5, 50, 10, 0.1, 2, 1, 10)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 
