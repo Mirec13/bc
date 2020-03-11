@@ -187,8 +187,18 @@ def prob_switch(initial_prob, number_of_iteration, actual_iteration):
     return prob
 
 
-def local_search():
-    pass
+def local_search(prev_flower, prev_random_flower_one, prev_random_flower_two):
+    prev = np.array(prev_flower)
+    prev_random_one = np.array(prev_random_flower_one)
+    prev_random_two = np.array(prev_random_flower_two)
+    uni_dist = np.random.uniform(0, 1)
+
+    prev_random_merged = np.add(prev_random_one, prev_random_two)
+    random_local = [uni_dist * i for i in prev_random_merged]
+    
+    new_flower = np.add(prev, random_local)
+
+    return list(new_flower)
 
 
 def levy_flight(index_beta):
