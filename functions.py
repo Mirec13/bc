@@ -126,9 +126,9 @@ def pareto_optimization(flowers, population, non_dominated):
                  (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1]))):
                 dominated = True
                 break
-            elif (((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
-                   (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1])) and
-                  (i != j)):
+            if (((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
+                (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1])) and
+               (i < j)):
                 dominated = True
                 break
         if not dominated:
