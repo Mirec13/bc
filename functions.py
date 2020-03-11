@@ -197,16 +197,28 @@ def levy_flight(index_beta):
     denominator = math.gamma((1 + index_beta) / 2) * index_beta * math.pow(2, (index_beta - 1) / 2)
     base = math.pow(numerator / denominator, exponent)
 
-    u = np.random.sample(0, base)
-    v = np.random.sample(0, 1)
+    u = np.random.normal(0, base)
+    v = abs(np.random.normal(0, 1))
 
     random_step = u / math.pow(v, 1 / index_beta)
+
+    #print(numerator, denominator,u, v, base, random_step)
 
     return random_step
 
 
 def global_search(index_beta, prev_best_flower, prev_flower):
-    pass
+    random_step = levy_flight(index_beta)
+    prev_best = np.array(prev_best_flower)
+    prev = np.array(prev_flower)
+    vector = np.subtract(prev_best, prev)
+    levy_vector = [random_step * i for i in vector]
+
+    new_flower = np.add(prev, levy_vector)
+
+    #print(new_flower, random_step)
+
+    return list(new_flower)
 
 
 

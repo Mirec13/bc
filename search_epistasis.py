@@ -57,6 +57,8 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
                 print(i.objective_function_score)
             print("\n", non_dominated)
 
+            #print(f.global_search(1.5, flowers[1].loci, flowers[0].loci))
+
             # the number of generation we want to create
             for i in range(number_of_iter):
                 glob = 0
