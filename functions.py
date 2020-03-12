@@ -31,7 +31,7 @@ def load_file(file_name):
 
 
 def init_first_population(number_of_dimension, number_of_loci, population):
-    random.seed(int(random.uniform(0, 100)))
+    random.seed(int(random.uniform(0, number_of_loci)))
     list_of_loci = [i for i in range(number_of_loci)]
     random.shuffle(list_of_loci)
     subset = []
@@ -187,7 +187,7 @@ def prob_switch(initial_prob, number_of_iteration, actual_iteration):
     return prob
 
 
-def local_search(prev_flower, prev_random_flower_one, prev_random_flower_two):
+def local_search(prev_flower, prev_random_flower_one, prev_random_flower_two, number_of_loci):
     prev = np.array(prev_flower)
     prev_random_one = np.array(prev_random_flower_one)
     prev_random_two = np.array(prev_random_flower_two)
@@ -195,10 +195,13 @@ def local_search(prev_flower, prev_random_flower_one, prev_random_flower_two):
 
     prev_random_merged = np.add(prev_random_one, prev_random_two)
     random_local = [uni_dist * i for i in prev_random_merged]
-    
-    new_flower = np.add(prev, random_local)
 
-    return list(new_flower)
+    new_flower_tmp = np.add(prev, random_local)
+
+    # adjust the vector to loci table
+    new_flower = adjust(new_flower_tmp, number_of_loci)
+
+    return new_flower
 
 
 def levy_flight(index_beta):
@@ -212,25 +215,37 @@ def levy_flight(index_beta):
 
     random_step = u / math.pow(v, 1 / index_beta)
 
-    #print(numerator, denominator,u, v, base, random_step)
-
     return random_step
 
 
-def global_search(index_beta, prev_best_flower, prev_flower):
+def global_search(index_beta, prev_best_flower, prev_flower, number_of_loci):
     random_step = levy_flight(index_beta)
     prev_best = np.array(prev_best_flower)
     prev = np.array(prev_flower)
     vector = np.subtract(prev_best, prev)
     levy_vector = [random_step * i for i in vector]
 
-    new_flower = np.add(prev, levy_vector)
+    new_flower_tmp = np.add(prev, levy_vector)
 
-    #print(new_flower, random_step)
+    # adjust the vector to loci table
+    new_flower = adjust(new_flower_tmp, number_of_loci)
 
-    return list(new_flower)
+    return new_flower
 
 
+def adjust(new_flower_tmp, number_of_loci):
+    new_flower = []
+    j = 0
+    for i in new_flower_tmp:
+        new_flower.append(int(round(i)))
+        while new_flower[j] > number_of_loci or new_flower[j] < 0:
+            if new_flower[j] > number_of_loci:
+                new_flower[j] -= number_of_loci
+            elif new_flower[j] < 0:
+                new_flower[j] += number_of_loci
+        j += 1
+
+    return new_flower
 
 
 

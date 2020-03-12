@@ -31,3 +31,5 @@ v2 = [1, 7, 12, 4, 5]
 some = numpy.array(v)
 some2 = numpy.array(v2)
 out = numpy.subtract(v, v2)
+
+print(int(round(0.5000001)))
