@@ -3,6 +3,8 @@ import math
 import numpy as np
 import random
 import itertools as c
+from collections import namedtuple
+from scipy.stats import chi2
 
 
 def load_file(file_name):
@@ -51,6 +53,23 @@ def init_first_population(number_of_dimension, number_of_loci, population):
             i += 1
 
     return subset
+
+
+def declare_flowers_struct(flowers, number_of_population, number_of_epi, comb):
+    # init the population
+    for i in range(number_of_population):
+        flower = namedtuple("flower", "loci observed_value expected_value objective_function_score")
+        flower.observed_value = [[0 for x in range(2)] for y in range(comb)]
+        flower.expected_value = [0.0] * comb
+        flower.loci = [0] * number_of_epi
+        flower.objective_function_score = [0.0] * 2
+        flowers.append(flower)
+
+
+def declare_snp_data_struct():
+    snp_data = namedtuple("snp_data", "sample_size snp_size data state")
+
+    return snp_data
 
 
 def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_value, state, number_of_epi):
@@ -114,7 +133,8 @@ def gi_score(observed_value, comb, sample_size):
     return final_score
 
 
-def pareto_optimization(flowers, population, non_dominated):
+def pareto_optimization(flowers, population):
+    non_dominated = []
     for i in range(population):
         dominated = False
         for j in range(population):
@@ -132,7 +152,30 @@ def pareto_optimization(flowers, population, non_dominated):
                 dominated = True
                 break
         if not dominated:
-            non_dominated.append(flowers[i].objective_function_score)
+            non_dominated.append(flowers[i])
+
+        return non_dominated
+
+
+def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi):
+    vector = [0] * number_of_epi
+    # get the best solution from pareto optimization
+    minimum = 2
+    for i in non_dominated_tmp:
+        df = subtract_df(i.observed_value, min_value_for_df, comb)
+        dist = chi2.sf((g_test(i.observed_value, i.expected_value, comb)), df)
+        if dist < minimum:
+            for j in range(number_of_epi):
+                vector[j] = i.loci[j]
+            minimum = dist
+        non_dom = namedtuple("non_dominated", "g_dist loci")
+        non_dom.g_dist = dist
+        non_dom.loci = []
+        for j in range(number_of_epi):
+            non_dom.loci.append(i.loci[j])
+        non_dominated.append(non_dom)
+
+    return vector
 
 
 def g_test(observed_value, expected_value, comb):
@@ -157,7 +200,8 @@ def g_test(observed_value, expected_value, comb):
 def subtract_df(observed_values, min_value, comb):
     df = comb
     for o in observed_values:
-        if (o[0] < min_value) and (o[1] < min_value):
+        observed_comb = o[0] + o[1]
+        if observed_comb < min_value:
             df -= 1
 
     return df
@@ -246,6 +290,9 @@ def adjust(new_flower_tmp, number_of_loci):
         j += 1
 
     return new_flower
+
+
+
 
 
 
