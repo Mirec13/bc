@@ -75,6 +75,12 @@ def declare_snp_data_struct():
 def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_value, state, number_of_epi):
     comb_number = 0
     match = 0
+    comb = pow(3, number_of_epi)
+
+    # set all observed values to zero
+    for i in range(comb):
+        observed_value[i][0] = 0
+        observed_value[i][1] = 1
 
     # compute the observed value for every combination's state
     for i in range(sample_size):
@@ -91,10 +97,8 @@ def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_val
             comb_number += 1
         comb_number = 0
 
-    comb_number = pow(3, number_of_epi)
-
     # compute the expected value
-    for i in range(comb_number):
+    for i in range(comb):
         expected_value[i] = ((observed_value[i][0] + observed_value[i][1]) / 2)
 
 
@@ -154,7 +158,7 @@ def pareto_optimization(flowers, population):
         if not dominated:
             non_dominated.append(flowers[i])
 
-        return non_dominated
+    return non_dominated
 
 
 def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi):
@@ -170,9 +174,9 @@ def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, numb
             minimum = dist
         non_dom = namedtuple("non_dominated", "g_dist loci")
         non_dom.g_dist = dist
-        non_dom.loci = []
+        non_dom.loci = [0] * number_of_epi
         for j in range(number_of_epi):
-            non_dom.loci.append(i.loci[j])
+            non_dom.loci[j] = i.loci[j]
         non_dominated.append(non_dom)
 
     return vector
@@ -282,8 +286,8 @@ def adjust(new_flower_tmp, number_of_loci):
     j = 0
     for i in new_flower_tmp:
         new_flower.append(int(round(i)))
-        while new_flower[j] > number_of_loci or new_flower[j] < 0:
-            if new_flower[j] > number_of_loci:
+        while new_flower[j] > number_of_loci - 1 or new_flower[j] < 0:
+            if new_flower[j] > number_of_loci - 1:
                 new_flower[j] -= number_of_loci
             elif new_flower[j] < 0:
                 new_flower[j] += number_of_loci
