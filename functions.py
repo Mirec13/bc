@@ -177,7 +177,17 @@ def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, numb
         non_dom.loci = [0] * number_of_epi
         for j in range(number_of_epi):
             non_dom.loci[j] = i.loci[j]
-        non_dominated.append(non_dom)
+
+        # check if we already have this solution in non_dominated list
+        match = False
+        for j in non_dominated:
+            if set(j.loci) == set(non_dom.loci):
+                match = True
+                break
+
+        # if we does not have this solution yet then we can add it
+        if not match:
+            non_dominated.append(non_dom)
 
     return vector
 
@@ -233,6 +243,18 @@ def comb_without_repetition(number, number_rep):
 def prob_switch(initial_prob, number_of_iteration, actual_iteration):
     prob = initial_prob + (0.1 * ((number_of_iteration - actual_iteration) / number_of_iteration))
     return prob
+
+
+def check_the_epistasis(flower, number_of_epi, number_of_loci):
+    add = 1
+    for i in range(number_of_epi):
+        for j in range(number_of_epi):
+            if (flower.loci[i] == flower.loci[j]) and (i != j):
+                if (flower.loci[j] + add) > (number_of_loci -1):
+                    flower.loci[j] = flower.loci[j] + add - number_of_loci
+                else:
+                    flower.loci[j] += add
+                add += 1
 
 
 def local_search(prev_flower, prev_random_flower_one, prev_random_flower_two, number_of_loci):

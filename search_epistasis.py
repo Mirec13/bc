@@ -2,7 +2,7 @@ import functions as f
 import numpy as np
 import time
 
-# TODO THINK THROUGH THE DUPLICATES IN NON_DOMINATED SOLUTION
+
 def search(file_name, initial_prob, number_of_iter, number_of_population, p_value, number_of_epi, repeat,
            min_value_for_df, index_beta):
     # declare structs and other variables
@@ -34,7 +34,6 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
             # initialize the first population
             vector = f.init_first_population(number_of_epi, snp_data.snp_size, number_of_population)
             print(vector)
-
             for i in range(number_of_population):
                 for j in range(number_of_epi):
                     flowers[i].loci[j] = vector[i][j]
@@ -48,34 +47,30 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
             non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
             prev_best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
 
-            # for i in flowers:
-            #     print(i.objective_function_score)
-
-            # print(non_dominated[0].g_dist, non_dominated[0].loci, prev_best)
-            # print(f.global_search(1.5, flowers[1].loci, flowers[0].loci, snp_data.snp_size))
-            # print(f.local_search(flowers[0].loci, flowers[1].loci, flowers[2].loci, snp_data.snp_size))
-
             # the number of generation we want to create
             for i in range(number_of_iter):
-                glob = 0
-                loc = 0
                 # swap
                 tmp = prev_flowers
                 prev_flowers = flowers
                 flowers = tmp
+                # get the value for switching between global and local search
                 switch_prob = f.prob_switch(initial_prob, number_of_iter, i)
                 # population for each generation
                 for j in range(number_of_population):
                     rand = f.random.uniform(0, 1)
                     if rand < switch_prob:
                         flowers[j].loci = f.global_search(index_beta, prev_best, prev_flowers[j].loci, snp_data.snp_size)
-                        glob += 1
                     else:
+                        # get two random flowers from the previous population
                         prev_random_flower_one = int(round(np.random.uniform(0, number_of_population - 1)))
                         prev_random_flower_two = int(round(np.random.uniform(0, number_of_population - 1)))
                         flowers[j].loci = f.local_search(prev_flowers[j].loci, prev_flowers[prev_random_flower_one].loci,
                                                          prev_flowers[prev_random_flower_two].loci, snp_data.snp_size)
-                        loc += 1
+
+                    # check whether we have repeating snp in loci and if we do then change it
+                    f.check_the_epistasis(flowers[j], number_of_epi, snp_data.snp_size)
+
+                    # compute the fitting score via objective functions
                     f.compute_o_and_e_values(snp_data.data, snp_data.sample_size, flowers[j].loci,
                                              flowers[j].observed_value, flowers[j].expected_value, snp_data.state,
                                              number_of_epi)
@@ -86,14 +81,16 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
                 # get the first non-dominated solution and the best loci
                 non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
                 prev_best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
-               # for k in non_dominated:
-                 #   print(k.g_dist, k.loci)
-                #print()
-                #f.pareto_optimization(flowers, number_of_population, non_dominated_tmp)
-                # print("Global ", glob, " Local ", loc)
 
             for i in non_dominated:
                 print(i.g_dist, i.loci)
+
+            p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size+1, number_of_epi)
+            print("P_VALUE: ", p_value_final)
+
+            for i in non_dominated:
+                if p_value_final > i.g_dist:
+                    print(i.g_dist, i.loci)
 
         break
 
