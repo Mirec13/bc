@@ -3,17 +3,20 @@ import numpy as np
 import time
 
 
-def search(file_name, initial_prob, number_of_iter, number_of_population, p_value, number_of_epi, repeat,
+def search(prefix_file_name, initial_prob, number_of_iter, number_of_population, p_value, number_of_epi, repeat,
            min_value_for_df, index_beta):
+    # define the file counter
+    file_counter = 0
+
     # declare structs and other variables
+    snp_data = f.declare_snp_data_struct()
     comb = pow(3, number_of_epi)
     flowers = []
     prev_flowers = []
-    snp_data = f.declare_snp_data_struct()
-    f.declare_flowers_struct(flowers, number_of_population, number_of_epi, comb)
-    f.declare_flowers_struct(prev_flowers, number_of_population, number_of_epi, comb)
 
     while True:
+        file_name = prefix_file_name + str(file_counter) + ".antesnp100.txt"
+        print(file_name)
         # Load the SNP data
         snp_data.data = f.load_file(file_name)
 
@@ -22,7 +25,16 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
             break
 
         for repeating in range(repeat):
+            # declare a non-dominated list
             non_dominated = []
+
+            # declare struct for flowers
+            f.declare_flowers_struct(flowers, number_of_population, number_of_epi, comb)
+            f.declare_flowers_struct(prev_flowers, number_of_population, number_of_epi, comb)
+
+            # Load the SNP data
+            snp_data.data = f.load_file(file_name)
+
             # initialize SNP data
             snp_data.snp_size = len(snp_data.data[0]) - 1
             snp_data.sample_size = len(snp_data.data)
@@ -92,13 +104,13 @@ def search(file_name, initial_prob, number_of_iter, number_of_population, p_valu
                 if p_value_final > i.g_dist:
                     print(i.g_dist, i.loci)
 
-        break
+        file_counter += 1
 
 
 def start():
     starting_time = time.perf_counter()
-    search(file_name="testFileME.txt", initial_prob=0.5, number_of_iter=50, number_of_population=50, p_value=0.1,
-           number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
+    search(prefix_file_name="81.1600.", initial_prob=0.5, number_of_iter=10, number_of_population=50, p_value=0.1,
+           number_of_epi=2, repeat=2, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 
