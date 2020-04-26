@@ -57,7 +57,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
             # get the first non-dominated solution and the best loci
             non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
-            prev_best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
+            best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
 
             # the number of generation we want to create
             for i in range(number_of_iter):
@@ -71,7 +71,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 for j in range(number_of_population):
                     rand = f.random.uniform(0, 1)
                     if rand < switch_prob:
-                        flowers[j].loci = f.global_search(index_beta, prev_best, prev_flowers[j].loci, snp_data.snp_size)
+                        flowers[j].loci = f.global_search(index_beta, best, prev_flowers[j].loci, snp_data.snp_size)
                     else:
                         # get two random flowers from the previous population
                         prev_random_flower_one = int(round(np.random.uniform(0, number_of_population - 1)))
@@ -92,7 +92,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
                 # get the first non-dominated solution and the best loci
                 non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
-                prev_best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
+                best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
 
             for i in non_dominated:
                 print(i.g_dist, i.loci)
@@ -109,8 +109,8 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="81.1600.", initial_prob=0.5, number_of_iter=10, number_of_population=50, p_value=0.1,
-           number_of_epi=2, repeat=2, min_value_for_df=10, index_beta=1.5)
+    search(prefix_file_name="81.1600.", initial_prob=0.6, number_of_iter=50, number_of_population=50, p_value=0.1,
+           number_of_epi=2, repeat=1, min_value_for_df=5, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 

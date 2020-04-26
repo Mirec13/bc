@@ -143,9 +143,11 @@ def pareto_optimization(flowers, population):
         dominated = False
         for j in range(population):
             if (((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
-                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1])) or
+                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1]))
+                    or
                 ((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
-                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1])) or
+                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1]))
+                    or
                 ((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
                  (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1]))):
                 dominated = True
@@ -165,13 +167,18 @@ def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, numb
     vector = [0] * number_of_epi
     # get the best solution from pareto optimization
     minimum = 2
+
     for i in non_dominated_tmp:
-        df = subtract_df(i.observed_value, min_value_for_df, comb)
+        df = subtract_df(i.observed_value, min_value_for_df, comb, number_of_epi)
+        df = df if df > 0 else 1
         dist = chi2.sf((g_test(i.observed_value, i.expected_value, comb)), df)
+        '''
+        # this find the best previous solution
         if dist < minimum:
             for j in range(number_of_epi):
                 vector[j] = i.loci[j]
             minimum = dist
+                                '''
         non_dom = namedtuple("non_dominated", "g_dist loci")
         non_dom.g_dist = dist
         non_dom.loci = [0] * number_of_epi
@@ -188,6 +195,13 @@ def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, numb
         # if we does not have this solution yet then we can add it
         if not match:
             non_dominated.append(non_dom)
+
+    # this code find the best current solution
+    for i in non_dominated:
+        if i.g_dist < minimum:
+            for j in range(number_of_epi):
+                vector[j] = i.loci[j]
+            minimum = i.g_dist
 
     return vector
 
@@ -211,8 +225,8 @@ def g_test(observed_value, expected_value, comb):
     return 2 * final_score
 
 
-def subtract_df(observed_values, min_value, comb):
-    df = comb
+def subtract_df(observed_values, min_value, comb, epi):
+    df = (epi - 1) * (comb - 1)
     for o in observed_values:
         observed_comb = o[0] + o[1]
         if observed_comb < min_value:
@@ -250,7 +264,7 @@ def check_the_epistasis(flower, number_of_epi, number_of_loci):
     for i in range(number_of_epi):
         for j in range(number_of_epi):
             if (flower.loci[i] == flower.loci[j]) and (i != j):
-                if (flower.loci[j] + add) > (number_of_loci -1):
+                if (flower.loci[j] + add) > (number_of_loci - 1):
                     flower.loci[j] = flower.loci[j] + add - number_of_loci
                 else:
                     flower.loci[j] += add
