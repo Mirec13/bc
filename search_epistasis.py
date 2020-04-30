@@ -3,8 +3,8 @@ import numpy as np
 import time
 
 
-def search(prefix_file_name, initial_prob, number_of_iter, number_of_population, p_value, number_of_epi, repeat,
-           min_value_for_df, index_beta):
+def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,  num_to_ban,
+           p_value, number_of_epi, repeat, min_value_for_df, index_beta):
     # define the file counter
     file_counter = 0
 
@@ -13,7 +13,13 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
     comb = pow(3, number_of_epi)
     flowers = []
     prev_flowers = []
+    ban_iter = 0
+    tabu = []
 
+    # these three variables are for storing the data evaluation results
+    TP = 0
+    FP = 0
+    FN = 0
     while True:
         file_name = prefix_file_name + str(file_counter) + ".antesnp100.txt"
         print(file_name)
@@ -27,6 +33,8 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
         for repeating in range(repeat):
             # declare a non-dominated list
             non_dominated = []
+            tabu = []
+            ban_iter = 0
 
             # declare struct for flowers
             f.declare_flowers_struct(flowers, number_of_population, number_of_epi, comb)
@@ -45,7 +53,10 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
             # initialize the first population
             vector = f.init_first_population(number_of_epi, snp_data.snp_size, number_of_population)
+
+            # print the init population
             print(vector)
+
             for i in range(number_of_population):
                 for j in range(number_of_epi):
                     flowers[i].loci[j] = vector[i][j]
@@ -57,8 +68,10 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
             # get the first non-dominated solution and the best loci
             non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
-            best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
-
+            best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu)
+            ban_iter += 1
+            GS = 0
+            LS = 0
             # the number of generation we want to create
             for i in range(number_of_iter):
                 # swap
@@ -67,13 +80,16 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 flowers = tmp
                 # get the value for switching between global and local search
                 switch_prob = f.prob_switch(initial_prob, number_of_iter, i)
+
                 # population for each generation
                 for j in range(number_of_population):
                     rand = f.random.uniform(0, 1)
                     if rand < switch_prob:
+                        GS += 1
                         flowers[j].loci = f.global_search(index_beta, best, prev_flowers[j].loci, snp_data.snp_size)
                     else:
                         # get two random flowers from the previous population
+                        LS += 1
                         prev_random_flower_one = int(round(np.random.uniform(0, number_of_population - 1)))
                         prev_random_flower_two = int(round(np.random.uniform(0, number_of_population - 1)))
                         flowers[j].loci = f.local_search(prev_flowers[j].loci, prev_flowers[prev_random_flower_one].loci,
@@ -92,25 +108,67 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
                 # get the first non-dominated solution and the best loci
                 non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
-                best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi)
+                prev_best = best
+                best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu)
+
+                # if the best solution was repeated then increment counter if not or the counter reached its limit
+                # then reset the counter and add the epistasis in tabu table
+                if (set(prev_best) == set(best)) and (ban_iter != (num_to_ban - 1)):
+                    ban_iter += 1
+                elif ban_iter == (num_to_ban - 1):
+                    tabu.append(best)
+                    ban_iter = 0
+                    #print("\ntoto je v tabu:", tabu, "\n")
+                    # for z in non_dominated:
+                    #    print(z.g_dist, z.loci)
+
+            # this entire section is for printing the results
+            non_dominated_accepted = []
 
             for i in non_dominated:
                 print(i.g_dist, i.loci)
 
-            p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size+1, number_of_epi)
+            p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
             print("P_VALUE: ", p_value_final)
+
+            non_dominated = f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+                                                                 snp_data.sample_size, snp_data.state, snp_data.data)
 
             for i in non_dominated:
                 if p_value_final > i.g_dist:
-                    print(i.g_dist, i.loci)
+                    f.add_to_non_dominated_accepted(i, non_dominated_accepted, number_of_epi)
+
+            for i in non_dominated_accepted:
+                print(i.g_dist, i.loci)
+
+            print("-------------------------------------")
+
+            non_dominated_accepted = f.get_all_unique_epistasis(non_dominated_accepted, snp_data.snp_size)
+
+            found = False
+            for i in non_dominated_accepted:
+                if set(i.loci) == set([0, 1]):
+                    found = True
+                else:
+                    FP += 1
+                print(i.g_dist, i.loci)
+
+            if found:
+                TP += 1
+            else:
+                FN += 1
+            print("GS:", GS, "LS:", LS)
+            print("\ncontrol:", "TP", TP, "FP", FP, "FN", FN, "\n")
 
         file_counter += 1
+
+    print("\nfinal results:", "number of files tested:", file_counter, "each file was repeated", repeat, "times", "TP", TP, "FP", FP, "FN", FN, "\n")
 
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="81.1600.", initial_prob=0.6, number_of_iter=50, number_of_population=50, p_value=0.1,
-           number_of_epi=2, repeat=1, min_value_for_df=5, index_beta=1.5)
+    search(prefix_file_name="/ME81/81.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40, num_to_ban=5,
+           p_value=0.1, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 

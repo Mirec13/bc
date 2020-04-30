@@ -66,6 +66,17 @@ def declare_flowers_struct(flowers, number_of_population, number_of_epi, comb):
         flowers.append(flower)
 
 
+def add_to_non_dominated_accepted(non_dominated, non_dominated_accepted, number_of_epi):
+    non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
+
+    non_dom.g_dist = non_dominated.g_dist
+    non_dom.loci = [0] * number_of_epi
+    for i in range(number_of_epi):
+        non_dom.loci[i] = non_dominated.loci[i]
+
+    non_dominated_accepted.append(non_dom)
+
+
 def declare_snp_data_struct():
     snp_data = namedtuple("snp_data", "sample_size snp_size data state")
 
@@ -80,7 +91,7 @@ def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_val
     # set all observed values to zero
     for i in range(comb):
         observed_value[i][0] = 0
-        observed_value[i][1] = 1
+        observed_value[i][1] = 0
 
     # compute the observed value for every combination's state
     for i in range(sample_size):
@@ -163,7 +174,7 @@ def pareto_optimization(flowers, population):
     return non_dominated
 
 
-def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi):
+def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu):
     vector = [0] * number_of_epi
     # get the best solution from pareto optimization
     minimum = 2
@@ -196,12 +207,17 @@ def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, numb
         if not match:
             non_dominated.append(non_dom)
 
+    banned = False
     # this code find the best current solution
     for i in non_dominated:
-        if i.g_dist < minimum:
+        for j in tabu:
+            if set(i.loci) == set(j):
+                banned = True
+        if (i.g_dist < minimum) and (not banned):
             for j in range(number_of_epi):
                 vector[j] = i.loci[j]
             minimum = i.g_dist
+        banned = False
 
     return vector
 
@@ -293,6 +309,7 @@ def levy_flight(index_beta):
     numerator = math.gamma(1 + index_beta) * math.sin((math.pi * index_beta) / 2)
     denominator = math.gamma((1 + index_beta) / 2) * index_beta * math.pow(2, (index_beta - 1) / 2)
     base = math.pow(numerator / denominator, exponent)
+    base = math.pow(base, 2)
 
     u = np.random.normal(0, base)
     v = abs(np.random.normal(0, 1))
@@ -332,8 +349,76 @@ def adjust(new_flower_tmp, number_of_loci):
     return new_flower
 
 
+def get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb, sample_size, state, data):
+    list_of_snp = []
+    for i in non_dominated:
+        for j in i.loci:
+            list_of_snp.append(j)
+
+    list_of_snp = set(list_of_snp)
+    list_of_snp_comb = list(c.combinations(list_of_snp, number_of_epi))
+    list_of_snp_comb = set(list_of_snp_comb)
+
+    non_dominated_comb = []
+    observed = [[0 for x in range(2)] for y in range(comb)]
+    expected = [0.0] * comb
+
+    print()
+    print(len(list_of_snp_comb))
+    print()
+
+    for i in list_of_snp_comb:
+        compute_o_and_e_values(data, sample_size, i, observed, expected, state, number_of_epi)
+        df = subtract_df(observed, min_value_for_df, comb, number_of_epi)
+        df = df if df > 0 else 1
+        dist = chi2.sf((g_test(observed, expected, comb)), df)
+        non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
+
+        non_dom.g_dist = dist
+        non_dom.loci = [0] * number_of_epi
+        for j in range(number_of_epi):
+            non_dom.loci[j] = i[j]
+
+        non_dominated_comb.append(non_dom)
+
+    return non_dominated_comb
 
 
+def get_all_unique_epistasis(non_dominate_accepted, snp_size):
+    checked_snp = [0] * snp_size
+    non_dominate_accepted_unq = []
 
+    for i in range(snp_size):
+        sub_non_dominate_accepted = []
+        for j in non_dominate_accepted:
+            match = False
+            for k in j.loci:
+                if checked_snp[k] == 1:
+                    match = True
+                    break
 
+            if not match:
+                for k in j.loci:
+                    if i == k:
+                        sub_non_dominate_accepted.append(j)
+
+        minimum = 2.0
+        match = False
+        for j in sub_non_dominate_accepted:
+            if minimum > j.g_dist:
+                match = True
+                minimum = j.g_dist
+                dist = j.g_dist
+                loci = j.loci
+
+        if match:
+            for j in loci:
+                checked_snp[j] = 1
+
+            non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
+            non_dom.g_dist = dist
+            non_dom.loci = loci
+            non_dominate_accepted_unq.append(non_dom)
+
+    return non_dominate_accepted_unq
 

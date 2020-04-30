@@ -33,3 +33,15 @@ some2 = numpy.array(v2)
 out = numpy.subtract(v, v2)
 
 print(int(round(0.5000001)))
+
+
+import itertools as c
+
+t = [0,1,2,3,4,2,4 ,4, 4, 7,7, 7]
+print(t)
+t = set(t)
+print(t)
+val = list(c.combinations(t, 2))
+unq = set(val)
+print(unq)
+
