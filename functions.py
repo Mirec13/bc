@@ -391,16 +391,9 @@ def get_all_unique_epistasis(non_dominate_accepted, snp_size):
     for i in range(snp_size):
         sub_non_dominate_accepted = []
         for j in non_dominate_accepted:
-            match = False
             for k in j.loci:
-                if checked_snp[k] == 1:
-                    match = True
-                    break
-
-            if not match:
-                for k in j.loci:
-                    if i == k:
-                        sub_non_dominate_accepted.append(j)
+                if i == k:
+                    sub_non_dominate_accepted.append(j)
 
         minimum = 2.0
         match = False
@@ -412,13 +405,41 @@ def get_all_unique_epistasis(non_dominate_accepted, snp_size):
                 loci = j.loci
 
         if match:
-            for j in loci:
-                checked_snp[j] = 1
+            checked_snp[i] = 1
 
-            non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
-            non_dom.g_dist = dist
-            non_dom.loci = loci
-            non_dominate_accepted_unq.append(non_dom)
+            found = False
+            for j in non_dominate_accepted_unq:
+                if set(j.loci) == set(loci):
+                    found = True
+
+            if not found:
+                non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
+                non_dom.g_dist = dist
+                non_dom.loci = loci
+                non_dominate_accepted_unq.append(non_dom)
 
     return non_dominate_accepted_unq
+
+
+def get_n_best(non_dominated, n):
+    best_n_non_dominated = []
+
+    min = 2
+    var = len(non_dominated)
+    for i in range(0, var):
+        for j in range(0, var - i - 1):
+            if non_dominated[j].g_dist > non_dominated[j + 1].g_dist:
+                temp1 = non_dominated[j].g_dist
+                temp2 = non_dominated[j].loci
+                non_dominated[j].g_dist = non_dominated[j + 1].g_dist
+                non_dominated[j].loci = non_dominated[j + 1].loci
+                non_dominated[j + 1].g_dist = temp1
+                non_dominated[j + 1].loci = temp2
+
+    if n < var:
+        for i in range(n):
+            best_n_non_dominated.append(non_dominated[i])
+        return best_n_non_dominated
+    else:
+        return non_dominated
 

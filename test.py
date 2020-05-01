@@ -45,3 +45,12 @@ val = list(c.combinations(t, 2))
 unq = set(val)
 print(unq)
 
+import random
+some = [1,2,3,4,5,6,7,8,9]
+some2 = [2,1,3,4,5,6,7,8,9]
+random.seed(1)
+random.shuffle(some)
+print(some)
+random.seed(1)
+random.shuffle(some2)
+print(some2)

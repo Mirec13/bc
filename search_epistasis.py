@@ -1,10 +1,11 @@
 import functions as f
 import numpy as np
 import time
+import random
 
 
 def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,  num_to_ban,
-           p_value, number_of_epi, repeat, min_value_for_df, index_beta):
+           best_n, p_value, number_of_epi, repeat, min_value_for_df, index_beta):
     # define the file counter
     file_counter = 0
 
@@ -51,12 +52,19 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 snp_data.state.append(row[snp_data.snp_size])
                 del row[snp_data.snp_size]
 
+            # code for shuffle the columns or just reverse it
+            '''
+            for i in range(len(snp_data.data)):
+                random.seed(file_counter)
+                random.shuffle(snp_data.data[i])
+                #snp_data.data[i].reverse()
+                '''
+
             # initialize the first population
             vector = f.init_first_population(number_of_epi, snp_data.snp_size, number_of_population)
 
             # print the init population
             print(vector)
-
             for i in range(number_of_population):
                 for j in range(number_of_epi):
                     flowers[i].loci[j] = vector[i][j]
@@ -125,8 +133,15 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             # this entire section is for printing the results
             non_dominated_accepted = []
 
-            for i in non_dominated:
-                print(i.g_dist, i.loci)
+            non_dominated = f.get_n_best(non_dominated, best_n)
+
+            for i in range(len(non_dominated)):
+                print(non_dominated[i].g_dist, non_dominated[i].loci)
+
+            print("---------------------------------------------------------------")
+
+            for i in range(len(non_dominated)):
+                print(non_dominated[i].g_dist, non_dominated[i].loci)
 
             p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
             print("P_VALUE: ", p_value_final)
@@ -167,8 +182,8 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="/ME81/81.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40, num_to_ban=5,
-           p_value=0.1, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
+    search(prefix_file_name="81.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
+           num_to_ban=5, best_n=30, p_value=0.1, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 
