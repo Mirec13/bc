@@ -176,20 +176,12 @@ def pareto_optimization(flowers, population):
 
 def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu):
     vector = [0] * number_of_epi
-    # get the best solution from pareto optimization
     minimum = 2
 
     for i in non_dominated_tmp:
         df = subtract_df(i.observed_value, min_value_for_df, comb, number_of_epi)
         df = df if df > 0 else 1
         dist = chi2.sf((g_test(i.observed_value, i.expected_value, comb)), df)
-        '''
-        # this find the best previous solution
-        if dist < minimum:
-            for j in range(number_of_epi):
-                vector[j] = i.loci[j]
-            minimum = dist
-                                '''
         non_dom = namedtuple("non_dominated", "g_dist loci")
         non_dom.g_dist = dist
         non_dom.loci = [0] * number_of_epi
@@ -402,29 +394,28 @@ def get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_o
     '''
 
 
-def get_all_unique_epistasis(non_dominated_accepted, snp_size):
+def get_all_unique_epistasis(non_dominated_accepted, snp_size, number_of_epi):
     checked_snp = [0] * snp_size
     non_dominated_accepted_unq = []
-    '''
-    for i in range(snp_size):
-        for j in range(len(non_dominated_accepted)):
-            found = False
-            for k in non_dominated_accepted[j].loci:
-                if checked_snp[i] == k:
-                    for m in non_dominated_accepted_unq:
-                        if set(non_dominated_accepted[j].loci) == set(m.loci):
-                            found = True
-                    if not found:
-                        non_dominated_accepted_unq.append(non_dominated_accepted[j])
+    var = len(non_dominated_accepted)
 
+    sort_non_dominated(var, non_dominated_accepted)
+
+    for i in range(var):
+        found = False
+        for j in range(len(non_dominated_accepted_unq)):
+            for k in range(number_of_epi):
+                if non_dominated_accepted_unq[j].loci[k] in non_dominated_accepted[i].loci:
                     found = True
 
-            if found:
-                break
+        if found:
+            continue
+        else:
+            non_dominated_accepted_unq.append(non_dominated_accepted[i])
 
-    return  non_dominated_accepted_unq
-    '''
+        return non_dominated_accepted_unq
 
+'''
     for i in range(snp_size):
         sub_non_dominated_accepted = []
         for j in non_dominated_accepted:
@@ -456,13 +447,10 @@ def get_all_unique_epistasis(non_dominated_accepted, snp_size):
                 non_dominated_accepted_unq.append(non_dom)
 
     return non_dominated_accepted_unq
+'''
 
 
-def get_n_best(non_dominated, n):
-    best_n_non_dominated = []
-
-    min = 2
-    var = len(non_dominated)
+def sort_non_dominated(var, non_dominated):
     for i in range(0, var):
         for j in range(0, var - i - 1):
             if non_dominated[j].g_dist > non_dominated[j + 1].g_dist:
@@ -472,6 +460,13 @@ def get_n_best(non_dominated, n):
                 non_dominated[j].loci = non_dominated[j + 1].loci
                 non_dominated[j + 1].g_dist = temp1
                 non_dominated[j + 1].loci = temp2
+
+
+def get_n_best(non_dominated, n):
+    best_n_non_dominated = []
+    var = len(non_dominated)
+
+    sort_non_dominated(var, non_dominated)
 
     if n < var:
         for i in range(n):
@@ -497,7 +492,7 @@ def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
 
     print(frequency, snp)
 
-    if (frequency >= ((number_of_iter * 2) / 5)) and (number_of_iter >= 10):
+    if frequency >= (snp_size / 6):
         return snp
     else:
         return -1

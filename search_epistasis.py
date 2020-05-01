@@ -113,7 +113,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                     flowers[j].objective_function_score[1] = f.gi_score(flowers[j].observed_value, comb,
                                                                         snp_data.sample_size)
 
-                # get the first non-dominated solution and the best loci
+                # get the non-dominated solution and the best loci
                 non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
                 prev_best = best
                 best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu)
@@ -132,25 +132,26 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             for i in range(len(non_dominated)):
                 print(non_dominated[i].g_dist, non_dominated[i].loci)
 
-            found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
+            if number_of_epi == 2:
+                found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
 
-            if found_snp != -1:
-                non_dominated = []
-                print("idem")
-                f.get_comb_of_snp(non_dominated, found_snp, number_of_epi, snp_data.snp_size, snp_data.sample_size, comb, snp_data.data, snp_data.state, min_value_for_df)
-            else:
-                non_dominated = f.get_n_best(non_dominated, best_n)
-                f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
-                                                     snp_data.sample_size, snp_data.state, snp_data.data)
+                if found_snp != -1:
+                    non_dominated = []
+                    print("idem")
+                    f.get_comb_of_snp(non_dominated, found_snp, number_of_epi, snp_data.snp_size, snp_data.sample_size, comb, snp_data.data, snp_data.state, min_value_for_df)
+                else:
+                    non_dominated = f.get_n_best(non_dominated, best_n)
+                    f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+                                                         snp_data.sample_size, snp_data.state, snp_data.data)
 
             p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
 
             for i in range(len(non_dominated)):
                 print(non_dominated[i].g_dist, non_dominated[i].loci)
 
-            for i in non_dominated:
-                if p_value_final > i.g_dist:
-                    f.add_to_non_dominated_accepted(i, non_dominated_accepted, number_of_epi)
+            for i in range(len(non_dominated)):
+                if p_value_final > non_dominated[i].g_dist:
+                    f.add_to_non_dominated_accepted(non_dominated[i], non_dominated_accepted, number_of_epi)
 
             print("P_VALUE: ", p_value_final)
 
@@ -160,8 +161,12 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
             print("-------------------------------------")
 
-            non_dominated_accepted = f.get_all_unique_epistasis(non_dominated_accepted, snp_data.snp_size)
+            non_dominated_accepted = f.get_all_unique_epistasis(non_dominated_accepted, snp_data.snp_size, number_of_epi)
 
+            for i in non_dominated_accepted:
+                print(i.g_dist, i.loci)
+
+            print("--------------------------------------")
             found = False
             for i in non_dominated_accepted:
                 if set(i.loci) == set([0, 1]):
@@ -179,13 +184,13 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
         file_counter += 1
 
-    print("\nfinal results:", "number of files tested:", file_counter, "each file was repeated", repeat, "times", "TP", TP, "FP", FP, "FN", FN, "\n")
+    print("\nfinal results:", "number of files tested:", file_counter, "each file was repeated", repeat, "times", "TP", TP, "FP", FP, "FN", FN)
 
 
 def start():
     starting_time = time.perf_counter()
     search(prefix_file_name="ME76/76.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
-           num_to_ban=5, best_n=30, p_value=0.05, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
+           num_to_ban=4, best_n=30, p_value=0.05, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 

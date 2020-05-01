@@ -54,3 +54,6 @@ print(some)
 random.seed(1)
 random.shuffle(some2)
 print(some2)
+
+if 10 in some:
+    print("yes it is")
