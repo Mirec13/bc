@@ -53,18 +53,17 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 del row[snp_data.snp_size]
 
             # code for shuffle the columns or just reverse it
-            '''
-            for i in range(len(snp_data.data)):
-                random.seed(file_counter)
-                random.shuffle(snp_data.data[i])
+            #for i in range(len(snp_data.data)):
+                #random.seed(file_counter)
+                #random.shuffle(snp_data.data[i])
                 #snp_data.data[i].reverse()
-                '''
 
             # initialize the first population
             vector = f.init_first_population(number_of_epi, snp_data.snp_size, number_of_population)
 
             # print the init population
             print(vector)
+
             for i in range(number_of_population):
                 for j in range(number_of_epi):
                     flowers[i].loci[j] = vector[i][j]
@@ -126,33 +125,36 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 elif ban_iter == (num_to_ban - 1):
                     tabu.append(best)
                     ban_iter = 0
-                    #print("\ntoto je v tabu:", tabu, "\n")
-                    # for z in non_dominated:
-                    #    print(z.g_dist, z.loci)
 
             # this entire section is for printing the results
             non_dominated_accepted = []
 
-            non_dominated = f.get_n_best(non_dominated, best_n)
-
             for i in range(len(non_dominated)):
                 print(non_dominated[i].g_dist, non_dominated[i].loci)
 
-            print("---------------------------------------------------------------")
+            found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
 
-            for i in range(len(non_dominated)):
-                print(non_dominated[i].g_dist, non_dominated[i].loci)
+            if found_snp != -1:
+                non_dominated = []
+                print("idem")
+                f.get_comb_of_snp(non_dominated, found_snp, number_of_epi, snp_data.snp_size, snp_data.sample_size, comb, snp_data.data, snp_data.state, min_value_for_df)
+            else:
+                non_dominated = f.get_n_best(non_dominated, best_n)
+                f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+                                                     snp_data.sample_size, snp_data.state, snp_data.data)
 
             p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
-            print("P_VALUE: ", p_value_final)
 
-            non_dominated = f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
-                                                                 snp_data.sample_size, snp_data.state, snp_data.data)
+            for i in range(len(non_dominated)):
+                print(non_dominated[i].g_dist, non_dominated[i].loci)
 
             for i in non_dominated:
                 if p_value_final > i.g_dist:
                     f.add_to_non_dominated_accepted(i, non_dominated_accepted, number_of_epi)
 
+            print("P_VALUE: ", p_value_final)
+
+            print("-------------------------------------")
             for i in non_dominated_accepted:
                 print(i.g_dist, i.loci)
 
@@ -182,8 +184,8 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="81.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
-           num_to_ban=5, best_n=30, p_value=0.1, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
+    search(prefix_file_name="ME76/76.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
+           num_to_ban=5, best_n=30, p_value=0.05, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 
