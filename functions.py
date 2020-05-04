@@ -168,7 +168,7 @@ def pareto_optimization(flowers, population):
                 break
             if (((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
                 (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1])) and
-               (i < j)):
+               (i > j)):
                 dominated = True
                 break
         if not dominated:
@@ -440,8 +440,7 @@ def get_n_best(non_dominated, n):
         return non_dominated
 
 
-# these part isn't use currently.
-
+# these parts aren't used.
 def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
     checked_snp = [0] * snp_size
 
@@ -498,3 +497,4 @@ def get_comb_of_snp(non_dominated, snp, number_of_epi, snp_size, sample_size, co
             non_dom.loci[j] = i.loci[j]
 
         non_dominated.append(non_dom)
+

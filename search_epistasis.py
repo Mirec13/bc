@@ -142,7 +142,6 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             '''
             if number_of_epi == 2:
                 found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
-
                 if found_snp != -1:
                     non_dominated = []
                     print("idem")
@@ -207,7 +206,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="ME70/70.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
+    search(prefix_file_name="ME81/81.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
            num_to_ban=4, best_n=30, p_value=0.05, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
