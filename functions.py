@@ -43,6 +43,7 @@ def init_first_population(number_of_dimension, number_of_loci, population):
         epistasis = random.sample(list_of_loci, number_of_dimension)
         match = False
         for vector in subset:
+            # if we already have this epistatsis in list
             if set(vector) == set(epistasis):
                 match = True
                 break
@@ -56,7 +57,7 @@ def init_first_population(number_of_dimension, number_of_loci, population):
 
 
 def declare_flowers_struct(flowers, number_of_population, number_of_epi, comb):
-    # init the population
+    # declare the population
     for i in range(number_of_population):
         flower = namedtuple("flower", "loci observed_value expected_value objective_function_score")
         flower.observed_value = [[0 for x in range(2)] for y in range(comb)]
@@ -66,6 +67,7 @@ def declare_flowers_struct(flowers, number_of_population, number_of_epi, comb):
         flowers.append(flower)
 
 
+# create a new collection of accepted epistasis, which have passed through the p_value
 def add_to_non_dominated_accepted(non_dominated, non_dominated_accepted, number_of_epi):
     non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
 
@@ -83,6 +85,7 @@ def declare_snp_data_struct():
     return snp_data
 
 
+# get the number of observed and expected values for every possible combinations
 def compute_o_and_e_values(data, sample_size, loci, observed_value, expected_value, state, number_of_epi):
     comb_number = 0
     match = 0
@@ -174,11 +177,13 @@ def pareto_optimization(flowers, population):
     return non_dominated
 
 
+# get the best solution and add newly found values accepted by pareto optimization in non_dominated set
 def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu):
     vector = [0] * number_of_epi
     minimum = 2
 
     for i in non_dominated_tmp:
+        # get the degree of freedom
         df = subtract_df(i.observed_value, min_value_for_df, comb, number_of_epi)
         df = df if df > 0 else 1
         dist = chi2.sf((g_test(i.observed_value, i.expected_value, comb)), df)
@@ -211,6 +216,7 @@ def best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, numb
             minimum = i.g_dist
         banned = False
 
+    # return the best solution within the iteration
     return vector
 
 
@@ -233,6 +239,7 @@ def g_test(observed_value, expected_value, comb):
     return 2 * final_score
 
 
+# correct the degree of freedom based on minimally accepted observed value
 def subtract_df(observed_values, min_value, comb, epi):
     df = (epi - 1) * (comb - 1)
     for o in observed_values:
@@ -262,11 +269,13 @@ def comb_without_repetition(number, number_rep):
     return final_result
 
 
+# dynamic switching probability strategy
 def prob_switch(initial_prob, number_of_iteration, actual_iteration):
     prob = initial_prob + (0.1 * ((number_of_iteration - actual_iteration) / number_of_iteration))
     return prob
 
 
+# check if the epistasis doesn't have a repeated value, if it does then correct it by increasing its number
 def check_the_epistasis(flower, number_of_epi, number_of_loci):
     add = 1
     for i in range(number_of_epi):
@@ -326,6 +335,7 @@ def global_search(index_beta, prev_best_flower, prev_flower, number_of_loci):
     return new_flower
 
 
+# adjusting the the numbers to loci table
 def adjust(new_flower_tmp, number_of_loci):
     new_flower = []
     j = 0
@@ -341,16 +351,21 @@ def adjust(new_flower_tmp, number_of_loci):
     return new_flower
 
 
+# get and evaluate all possible combinations from top n non_dominated solutions
+# epistasis accepted by pareto optimization add in non_dominated collection
 def get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb, sample_size, state, data):
+    # fetch all unique SNP from top n non_dominated solutions
     list_of_snp = []
     for i in non_dominated:
         for j in i.loci:
             list_of_snp.append(j)
 
+    # get all unique possibilities for epistasis
     list_of_snp = set(list_of_snp)
     list_of_snp_comb = list(c.combinations(list_of_snp, number_of_epi))
     list_of_snp_comb = set(list_of_snp_comb)
 
+    # evaluate all found combinations and add the accepted ones in non_dominated collection
     snp_comb = []
     declare_flowers_struct(snp_comb, len(list_of_snp_comb), number_of_epi, comb)
 
@@ -364,43 +379,25 @@ def get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_o
         j += 1
 
     non_dominated_tmp = pareto_optimization(snp_comb, len(list_of_snp_comb))
+
+    # we want to only add the accepted epistasis to non_dominated collection and dont want the best solution
     empty_list = []
     best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, empty_list)
 
-    '''
-    non_dominated_comb = []
-    observed = [[0 for x in range(2)] for y in range(comb)]
-    expected = [0.0] * comb
 
-    print()
-    print(len(list_of_snp_comb))
-    print()
-
-    for i in list_of_snp_comb:
-        compute_o_and_e_values(data, sample_size, i, observed, expected, state, number_of_epi)
-        df = subtract_df(observed, min_value_for_df, comb, number_of_epi)
-        df = df if df > 0 else 1
-        dist = chi2.sf((g_test(observed, expected, comb)), df)
-        non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
-
-        non_dom.g_dist = dist
-        non_dom.loci = [0] * number_of_epi
-        for j in range(number_of_epi):
-            non_dom.loci[j] = i[j]
-
-        non_dominated_comb.append(non_dom)
-
-    return non_dominated_comb
-    '''
-
-
+# filtration false positives by AntiEpiSeekers technique
 def get_all_unique_epistasis(non_dominated_accepted, snp_size, number_of_epi):
     checked_snp = [0] * snp_size
     non_dominated_accepted_unq = []
     var = len(non_dominated_accepted)
 
-    sort_non_dominated(var, non_dominated_accepted)
+    # if we found some epistasis accepted by p_value then sort in ascending order
+    if var == 0:
+        return non_dominated_accepted
+    else:
+        sort_non_dominated(var, non_dominated_accepted)
 
+    # create a new non_dominated_accepted collection based on filtration technique described in AntEpiSeeker
     for i in range(var):
         found = False
         for j in range(len(non_dominated_accepted_unq)):
@@ -413,41 +410,7 @@ def get_all_unique_epistasis(non_dominated_accepted, snp_size, number_of_epi):
         else:
             non_dominated_accepted_unq.append(non_dominated_accepted[i])
 
-        return non_dominated_accepted_unq
-
-'''
-    for i in range(snp_size):
-        sub_non_dominated_accepted = []
-        for j in non_dominated_accepted:
-            for k in j.loci:
-                if i == k:
-                    sub_non_dominated_accepted.append(j)
-
-        minimum = 2.0
-        match = False
-        for j in sub_non_dominated_accepted:
-            if minimum > j.g_dist:
-                match = True
-                minimum = j.g_dist
-                dist = j.g_dist
-                loci = j.loci
-
-        if match:
-            checked_snp[i] = 1
-
-            found = False
-            for j in non_dominated_accepted_unq:
-                if set(j.loci) == set(loci):
-                    found = True
-
-            if not found:
-                non_dom = namedtuple("non_dominated_accepted", "g_dist loci")
-                non_dom.g_dist = dist
-                non_dom.loci = loci
-                non_dominated_accepted_unq.append(non_dom)
-
     return non_dominated_accepted_unq
-'''
 
 
 def sort_non_dominated(var, non_dominated):
@@ -462,6 +425,7 @@ def sort_non_dominated(var, non_dominated):
                 non_dominated[j + 1].loci = temp2
 
 
+# get the top n best non_dominated solutions
 def get_n_best(non_dominated, n):
     best_n_non_dominated = []
     var = len(non_dominated)
@@ -475,6 +439,8 @@ def get_n_best(non_dominated, n):
     else:
         return non_dominated
 
+
+# these part isn't use currently.
 
 def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
     checked_snp = [0] * snp_size
@@ -492,7 +458,7 @@ def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
 
     print(frequency, snp)
 
-    if frequency >= (snp_size / 6):
+    if frequency >= (snp_size / 5):
         return snp
     else:
         return -1

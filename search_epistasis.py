@@ -31,6 +31,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
         if not snp_data.data:
             break
 
+        # the number of repetition, we want to do for each dataset
         for repeating in range(repeat):
             # declare a non-dominated list
             non_dominated = []
@@ -56,6 +57,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             #for i in range(len(snp_data.data)):
                 #random.seed(file_counter)
                 #random.shuffle(snp_data.data[i])
+
                 #snp_data.data[i].reverse()
 
             # initialize the first population
@@ -64,6 +66,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             # print the init population
             print(vector)
 
+            # evaluate the first population
             for i in range(number_of_population):
                 for j in range(number_of_epi):
                     flowers[i].loci[j] = vector[i][j]
@@ -77,6 +80,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             non_dominated_tmp = f.pareto_optimization(flowers, number_of_population)
             best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu)
             ban_iter += 1
+
             GS = 0
             LS = 0
             # the number of generation we want to create
@@ -85,18 +89,22 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 tmp = prev_flowers
                 prev_flowers = flowers
                 flowers = tmp
+
                 # get the value for switching between global and local search
                 switch_prob = f.prob_switch(initial_prob, number_of_iter, i)
 
                 # population for each generation
                 for j in range(number_of_population):
                     rand = f.random.uniform(0, 1)
+                    # global search
                     if rand < switch_prob:
                         GS += 1
+                        # generate a new flower
                         flowers[j].loci = f.global_search(index_beta, best, prev_flowers[j].loci, snp_data.snp_size)
+                    # local search
                     else:
-                        # get two random flowers from the previous population
                         LS += 1
+                        # get two random flowers from the previous population then generate a new one
                         prev_random_flower_one = int(round(np.random.uniform(0, number_of_population - 1)))
                         prev_random_flower_two = int(round(np.random.uniform(0, number_of_population - 1)))
                         flowers[j].loci = f.local_search(prev_flowers[j].loci, prev_flowers[prev_random_flower_one].loci,
@@ -118,7 +126,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 prev_best = best
                 best = f.best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, tabu)
 
-                # if the best solution was repeated then increment counter if not or the counter reached its limit
+                # if the best solution was repeated, then increment counter, if not or the counter reached its limit
                 # then reset the counter and add the epistasis in tabu table
                 if (set(prev_best) == set(best)) and (ban_iter != (num_to_ban - 1)):
                     ban_iter += 1
@@ -126,12 +134,12 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                     tabu.append(best)
                     ban_iter = 0
 
-            # this entire section is for printing the results
-            non_dominated_accepted = []
-
+            # print the initial non_dominated solution
             for i in range(len(non_dominated)):
                 print(non_dominated[i].g_dist, non_dominated[i].loci)
 
+            # this section was for testing my adding extension not decided whether I'll use it or not
+            '''
             if number_of_epi == 2:
                 found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
 
@@ -143,11 +151,21 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                     non_dominated = f.get_n_best(non_dominated, best_n)
                     f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
                                                          snp_data.sample_size, snp_data.state, snp_data.data)
+                   '''
 
+            # get the top n non_dominated solutions and generate all combinations from them
+            non_dominated = f.get_n_best(non_dominated, best_n)
+            f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+                                                snp_data.sample_size, snp_data.state, snp_data.data)
+
+            # compute p_value corrected by Bonferroni correction
             p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
 
+            print("-------top n non_dominated + all combination opitmized with pareto optimization---------")
             for i in range(len(non_dominated)):
                 print(non_dominated[i].g_dist, non_dominated[i].loci)
+
+            non_dominated_accepted = []
 
             for i in range(len(non_dominated)):
                 if p_value_final > non_dominated[i].g_dist:
@@ -155,14 +173,14 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
             print("P_VALUE: ", p_value_final)
 
-            print("-------------------------------------")
+            print("---------------non_dominated solutions smaller then corrected p_value------------------")
             for i in non_dominated_accepted:
                 print(i.g_dist, i.loci)
 
-            print("-------------------------------------")
-
+            # filtrate the solution
             non_dominated_accepted = f.get_all_unique_epistasis(non_dominated_accepted, snp_data.snp_size, number_of_epi)
 
+            print("-----------------filtrated non_dominated solution--------------------")
             for i in non_dominated_accepted:
                 print(i.g_dist, i.loci)
 
@@ -189,7 +207,7 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="ME76/76.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
+    search(prefix_file_name="ME70/70.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
            num_to_ban=4, best_n=30, p_value=0.05, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
