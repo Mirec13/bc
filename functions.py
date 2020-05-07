@@ -449,15 +449,24 @@ def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
             checked_snp[j] += 1
 
     maximum = -1
+    maximum_second = -1
+    snp = -1
     for i in range(snp_size):
         if maximum < checked_snp[i]:
             maximum = checked_snp[i]
             snp = i
             frequency = checked_snp[i]
+        if (maximum == checked_snp[i]) and (snp != i):
+            maximum_second = checked_snp[i]
+
+    unique_best = True
+    print(maximum, maximum_second)
+    if maximum_second == maximum:
+        unique_best = False
 
     print(frequency, snp)
 
-    if frequency >= (snp_size / 5):
+    if (frequency >= (snp_size / 5)) and unique_best:
         return snp
     else:
         return -1
@@ -485,7 +494,7 @@ def get_comb_of_snp(non_dominated, snp, number_of_epi, snp_size, sample_size, co
         j += 1
 
     non_dominated_tmp = pareto_optimization(snp_comb, len(list_of_snp_comb))
-
+    '''
     for i in non_dominated_tmp:
         df = subtract_df(i.observed_value, min_value_for_df, comb, number_of_epi)
         df = df if df > 0 else 1
@@ -495,6 +504,10 @@ def get_comb_of_snp(non_dominated, snp, number_of_epi, snp_size, sample_size, co
         non_dom.loci = [0] * number_of_epi
         for j in range(number_of_epi):
             non_dom.loci[j] = i.loci[j]
-
+            
         non_dominated.append(non_dom)
+        '''
+    # we want to only add the accepted epistasis to non_dominated collection and dont want the best solution
+    empty_list = []
+    best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, empty_list)
 

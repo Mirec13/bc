@@ -138,24 +138,30 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             for i in range(len(non_dominated)):
                 print(non_dominated[i].g_dist, non_dominated[i].loci)
 
-            # this section was for testing my adding extension not decided whether I'll use it or not
-            '''
+            # our extension is only for epi 2, hence if epi is different do not use our extension
             if number_of_epi == 2:
                 found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
                 if found_snp != -1:
-                    non_dominated = []
                     print("idem")
                     f.get_comb_of_snp(non_dominated, found_snp, number_of_epi, snp_data.snp_size, snp_data.sample_size, comb, snp_data.data, snp_data.state, min_value_for_df)
+
+                    non_dominated = f.get_n_best(non_dominated, best_n)
+                    f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+                                                         snp_data.sample_size, snp_data.state, snp_data.data)
                 else:
                     non_dominated = f.get_n_best(non_dominated, best_n)
                     f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
                                                          snp_data.sample_size, snp_data.state, snp_data.data)
-                   '''
+            else:
+                # get the top n non_dominated solutions and generate all combinations from them
+                non_dominated = f.get_n_best(non_dominated, best_n)
+                f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+                                                    snp_data.sample_size, snp_data.state, snp_data.data)
 
-            # get the top n non_dominated solutions and generate all combinations from them
-            non_dominated = f.get_n_best(non_dominated, best_n)
-            f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
-                                                snp_data.sample_size, snp_data.state, snp_data.data)
+            ## get the top n non_dominated solutions and generate all combinations from them
+            #non_dominated = f.get_n_best(non_dominated, best_n)
+            #f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
+            #                                     snp_data.sample_size, snp_data.state, snp_data.data)
 
             # compute p_value corrected by Bonferroni correction
             p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
@@ -183,14 +189,14 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             for i in non_dominated_accepted:
                 print(i.g_dist, i.loci)
 
-            print("--------------------------------------")
+            #print("--------------------------------------")
             found = False
             for i in non_dominated_accepted:
                 if set(i.loci) == set([0, 1]):
                     found = True
                 else:
                     FP += 1
-                print(i.g_dist, i.loci)
+                #print(i.g_dist, i.loci)
 
             if found:
                 TP += 1
@@ -206,8 +212,8 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="ME81/81.1600.", initial_prob=0.5, number_of_iter=40, number_of_population=40,
-           num_to_ban=4, best_n=30, p_value=0.05, number_of_epi=2, repeat=1, min_value_for_df=10, index_beta=1.5)
+    search(prefix_file_name="ME75/75.1600.", initial_prob=0.5, number_of_iter=50, number_of_population=50,
+           num_to_ban=4, best_n=12, p_value=0.05, number_of_epi=2, repeat=3, min_value_for_df=10, index_beta=1.5)
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 
