@@ -1,0 +1,2 @@
+file_prefix_name,initial_prob,number_of_iter,number_of_population,num_to_ban,best_n,p_value,number_of_epi,repeat,min_value_for_df,index_beta
+ME81/81.1600.,0.5,50,50,4,12,0.05,2,3,10,1.5

@@ -212,8 +212,10 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    search(prefix_file_name="ME75/75.1600.", initial_prob=0.5, number_of_iter=50, number_of_population=50,
-           num_to_ban=4, best_n=12, p_value=0.05, number_of_epi=2, repeat=3, min_value_for_df=10, index_beta=1.5)
+    params = f.load_parameters("datasets/params.txt")
+    search(prefix_file_name=params[0][0], initial_prob=float(params[0][1]), number_of_iter=int(params[0][2]), number_of_population=int(params[0][3]),
+           num_to_ban=int(params[0][4]), best_n=int(params[0][5]), p_value=float(params[0][6]), number_of_epi=int(params[0][7]), repeat=int(params[0][8]),
+           min_value_for_df=int(params[0][9]), index_beta=float(params[0][10]))
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 

@@ -7,6 +7,21 @@ from collections import namedtuple
 from scipy.stats import chi2
 
 
+def load_parameters(file_name):
+    try:
+        # load the csv file in 2D list
+        with open(file_name, newline='') as csv_file:
+            data = list(csv.reader(csv_file))
+
+        # delete the name of the columns from list
+        del data[0]
+
+        return data
+    except FileNotFoundError:
+        data = False
+        return data
+
+
 def load_file(file_name):
     try:
         # append the path to the file
@@ -122,11 +137,11 @@ def k2_score(observed_value, comb):
 
     for i in range(comb):
         num_o_value = observed_value[i][0] + observed_value[i][1]
-        for j in range(num_o_value+1):
-            final_score += math.log(j+1)
+        for j in range(num_o_value + 1):
+            final_score += math.log(j + 1)
         for j in range(2):
             for k in range(observed_value[i][j]):
-                sub_score[j] += math.log(k+1)
+                sub_score[j] += math.log(k + 1)
         final_score -= (sub_score[0] + sub_score[1])
         sub_score[0] = 0.0
         sub_score[1] = 0.0
@@ -159,16 +174,16 @@ def pareto_optimization(flowers, population):
             if (((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
                  (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1]))
                     or
-                ((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
-                 (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1]))
+                    ((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
+                     (flowers[j].objective_function_score[1] < flowers[i].objective_function_score[1]))
                     or
-                ((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
-                 (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1]))):
+                    ((flowers[j].objective_function_score[0] < flowers[i].objective_function_score[0]) and
+                     (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1]))):
                 dominated = True
                 break
             if (((flowers[j].objective_function_score[0] == flowers[i].objective_function_score[0]) and
-                (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1])) and
-               (i > j)):
+                 (flowers[j].objective_function_score[1] == flowers[i].objective_function_score[1])) and
+                    (i > j)):
                 dominated = True
                 break
         if not dominated:
@@ -373,7 +388,7 @@ def get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_o
     for i in list_of_snp_comb:
         snp_comb[j].loci = i
         compute_o_and_e_values(data, sample_size, snp_comb[j].loci, snp_comb[j].observed_value,
-                                 snp_comb[j].expected_value, state, number_of_epi)
+                               snp_comb[j].expected_value, state, number_of_epi)
         snp_comb[j].objective_function_score[0] = k2_score(snp_comb[j].observed_value, comb)
         snp_comb[j].objective_function_score[1] = gi_score(snp_comb[j].observed_value, comb, sample_size)
         j += 1
@@ -440,7 +455,7 @@ def get_n_best(non_dominated, n):
         return non_dominated
 
 
-# these parts aren't used.
+# these parts are our extension
 def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
     checked_snp = [0] * snp_size
 
@@ -472,7 +487,7 @@ def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
         return -1
 
 
-def get_comb_of_snp(non_dominated, snp, number_of_epi, snp_size, sample_size, comb, data, state,  min_value_for_df):
+def get_comb_of_snp(non_dominated, snp, number_of_epi, snp_size, sample_size, comb, data, state, min_value_for_df):
     list_of_snp_comb = []
     for i in range(snp_size):
         if i == snp:
@@ -488,26 +503,13 @@ def get_comb_of_snp(non_dominated, snp, number_of_epi, snp_size, sample_size, co
     for i in list_of_snp_comb:
         snp_comb[j].loci = i
         compute_o_and_e_values(data, sample_size, snp_comb[j].loci, snp_comb[j].observed_value,
-                                 snp_comb[j].expected_value, state, number_of_epi)
+                               snp_comb[j].expected_value, state, number_of_epi)
         snp_comb[j].objective_function_score[0] = k2_score(snp_comb[j].observed_value, comb)
         snp_comb[j].objective_function_score[1] = gi_score(snp_comb[j].observed_value, comb, sample_size)
         j += 1
 
     non_dominated_tmp = pareto_optimization(snp_comb, len(list_of_snp_comb))
-    '''
-    for i in non_dominated_tmp:
-        df = subtract_df(i.observed_value, min_value_for_df, comb, number_of_epi)
-        df = df if df > 0 else 1
-        dist = chi2.sf((g_test(i.observed_value, i.expected_value, comb)), df)
-        non_dom = namedtuple("non_dominated", "g_dist loci")
-        non_dom.g_dist = dist
-        non_dom.loci = [0] * number_of_epi
-        for j in range(number_of_epi):
-            non_dom.loci[j] = i.loci[j]
-            
-        non_dominated.append(non_dom)
-        '''
+
     # we want to only add the accepted epistasis to non_dominated collection and dont want the best solution
     empty_list = []
     best_solution(non_dominated_tmp, non_dominated, min_value_for_df, comb, number_of_epi, empty_list)
-
