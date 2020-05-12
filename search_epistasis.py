@@ -213,9 +213,12 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 def start():
     starting_time = time.perf_counter()
     params = f.load_parameters("datasets/params.txt")
-    search(prefix_file_name=params[0][0], initial_prob=float(params[0][1]), number_of_iter=int(params[0][2]), number_of_population=int(params[0][3]),
-           num_to_ban=int(params[0][4]), best_n=int(params[0][5]), p_value=float(params[0][6]), number_of_epi=int(params[0][7]), repeat=int(params[0][8]),
-           min_value_for_df=int(params[0][9]), index_beta=float(params[0][10]))
+    if params:
+        search(prefix_file_name=params[0][0], initial_prob=float(params[0][1]), number_of_iter=int(params[0][2]), number_of_population=int(params[0][3]),
+               num_to_ban=int(params[0][4]), best_n=int(params[0][5]), p_value=float(params[0][6]), number_of_epi=int(params[0][7]), repeat=int(params[0][8]),
+               min_value_for_df=int(params[0][9]), index_beta=float(params[0][10]))
+    else:
+        print("Zle pomenovaný subor alebo je ulozeny v zlom priecinku")
     ending_time = time.perf_counter()
     print("\nCOMPUTATION TIME:", ending_time - starting_time, "seconds")
 
