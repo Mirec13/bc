@@ -142,7 +142,6 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
             if number_of_epi == 2:
                 found_snp = f.find_most_frequent_snp(non_dominated, number_of_iter, snp_data.snp_size)
                 if found_snp != -1:
-                    print("idem")
                     f.get_comb_of_snp(non_dominated, found_snp, number_of_epi, snp_data.snp_size, snp_data.sample_size, comb, snp_data.data, snp_data.state, min_value_for_df)
 
                     non_dominated = f.get_n_best(non_dominated, best_n)
@@ -157,11 +156,6 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
                 non_dominated = f.get_n_best(non_dominated, best_n)
                 f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
                                                     snp_data.sample_size, snp_data.state, snp_data.data)
-
-            ## get the top n non_dominated solutions and generate all combinations from them
-            #non_dominated = f.get_n_best(non_dominated, best_n)
-            #f.get_all_non_dominated_combinations(non_dominated, min_value_for_df, number_of_epi, comb,
-            #                                     snp_data.sample_size, snp_data.state, snp_data.data)
 
             # compute p_value corrected by Bonferroni correction
             p_value_final = p_value / f.comb_without_repetition(snp_data.snp_size, number_of_epi)
@@ -212,7 +206,8 @@ def search(prefix_file_name, initial_prob, number_of_iter, number_of_population,
 
 def start():
     starting_time = time.perf_counter()
-    params = f.load_parameters("datasets/params.txt")
+    params = f.load_parameters("params.txt")
+    print(params)
     if params:
         search(prefix_file_name=params[0][0], initial_prob=float(params[0][1]), number_of_iter=int(params[0][2]), number_of_population=int(params[0][3]),
                num_to_ban=int(params[0][4]), best_n=int(params[0][5]), p_value=float(params[0][6]), number_of_epi=int(params[0][7]), repeat=int(params[0][8]),

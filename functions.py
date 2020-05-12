@@ -466,6 +466,7 @@ def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
     maximum = -1
     maximum_second = -1
     snp = -1
+    frequency = -1
     for i in range(snp_size):
         if maximum < checked_snp[i]:
             maximum = checked_snp[i]
@@ -475,7 +476,7 @@ def find_most_frequent_snp(non_dominated, number_of_iter, snp_size):
             maximum_second = checked_snp[i]
 
     unique_best = True
-    print(maximum, maximum_second)
+    #print(maximum, maximum_second)
     if maximum_second == maximum:
         unique_best = False
 
